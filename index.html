@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fıstık Takip Sistemi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
+        /* Modern UI Ayarları */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
             margin: 0;
             padding: 0;
             display: flex;
@@ -18,127 +20,139 @@
             max-width: 480px;
             background-color: #ffffff;
             min-height: 100vh;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: relative;
+            padding-bottom: 70px; /* Alt menü için boşluk */
         }
+        
+        /* Üst Bilgi */
         .header {
-            background-color: #2e7d32;
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
             color: white;
             text-align: center;
             padding: 20px;
-            font-size: 22px;
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 700;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
             position: relative;
         }
         .logout-btn {
             position: absolute;
             right: 15px;
             top: 22px;
-            background: none;
+            background: rgba(255,255,255,0.2);
             border: none;
             color: white;
-            font-size: 14px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 13px;
             cursor: pointer;
         }
-        .form-section, .list-section {
+
+        /* Sekme İçerikleri */
+        .tab-content {
+            display: none;
             padding: 20px;
+            animation: fadeIn 0.3s;
         }
-        .row {
-            display: flex;
-            gap: 10px;
-        }
-        .row .input-group {
-            flex: 1;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        .input-group label {
+        .tab-content.active {
             display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: bold;
-            font-size: 14px;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Girdi ve Buton Tasarımları */
+        .row { display: flex; gap: 12px; }
+        .row .input-group { flex: 1; }
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; margin-bottom: 6px; color: #555; font-weight: 600; font-size: 13px; }
         .input-group input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            padding: 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
             box-sizing: border-box;
-            font-size: 16px;
+            font-size: 15px;
+            background-color: #f9f9f9;
+            transition: 0.3s;
         }
+        .input-group input:focus { border-color: #2e7d32; outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(46,125,50,0.1); }
+        #toplam { background-color: #fff8e1; color: #d84315; font-weight: bold; border-color: #ffecb3; }
+
         .btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background-color: #2e7d32;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+            transition: 0.2s;
         }
-        .btn:hover {
-            background-color: #1b5e20;
-        }
-        .list-section h3 {
-            margin-top: 0;
-            color: #444;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
+        .btn:active { transform: scale(0.98); }
+        .btn-pdf { background-color: #d32f2f; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3); margin-top: 15px;}
+
+        /* Kart Tasarımları (Geçmiş & Rapor) */
         .record-card {
-            background-color: #f9f9f9;
-            border-left: 5px solid #2e7d32;
-            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #eee;
+            padding: 16px;
             margin-bottom: 15px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border-left: 5px solid #2e7d32;
         }
-        .record-info h4 {
-            margin: 0 0 5px 0;
-            color: #222;
-        }
-        .route-info {
-            margin: 0 0 5px 0;
-            color: #2e7d32;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .record-info p {
-            margin: 0 0 5px 0;
-            color: #666;
-            font-size: 14px;
-        }
-        .record-info strong {
-            color: #2e7d32;
-            font-size: 16px;
-        }
-        .record-actions button {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 5px;
-        }
-        .delete-btn { color: #c62828; }
+        .record-date { position: absolute; top: 12px; right: 16px; font-size: 11px; color: #999; font-weight: 600;}
+        .record-info h4 { margin: 0 0 6px 0; color: #222; font-size: 16px;}
+        .route-info { color: #555; font-size: 13px; margin-bottom: 8px;}
+        .record-info strong { color: #d84315; font-size: 17px; display: block; margin-top: 5px;}
+        .delete-btn { position: absolute; bottom: 12px; right: 16px; background: #ffebee; border: none; color: #c62828; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+
+        /* Rapor Özel Sınıfları */
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .summary-box { background: #e8f5e9; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #c8e6c9;}
+        .summary-box.full { grid-column: span 2; background: #e3f2fd; border-color: #bbdefb; }
+        .summary-box small { color: #555; font-size: 12px; font-weight: 600; display: block; margin-bottom: 5px;}
+        .summary-box strong { color: #1b5e20; font-size: 18px; }
+        .summary-box.full strong { color: #1565c0; }
         
-        #loginPage {
+        /* Müşteri Listesi */
+        .customer-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #ddd; font-size: 14px;}
+        .customer-item:last-child { border-bottom: none; }
+        .customer-item span { font-weight: 600; color: #d84315;}
+
+        /* Alt Navigasyon (Tab Menü) */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: #fff;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        .nav-item {
             text-align: center;
-            min-height: 70vh;
+            color: #888;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+            padding: 10px 0;
         }
-        #mainApp {
-            display: none;
-        }
+        .nav-item.active { color: #2e7d32; }
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 4px; font-style: normal; }
+
+        #loginPage { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; min-height: 70vh; }
+        #mainApp { display: none; }
     </style>
 </head>
 <body>
@@ -146,52 +160,96 @@
 <div class="app-container">
     <div class="header">
         Fıstık Nakliye
-        <button id="logoutBtn" class="logout-btn" style="display: none;">Çıkış</button>
+        <button id="logoutBtn" class="logout-btn" style="display: none;">Çıkış Yap</button>
     </div>
 
     <div id="loginPage">
-        <h2>Fıstık Takip Sistemine Hoş Geldiniz</h2>
-        <p>Verilerinizin güvenle saklanması için lütfen Google hesabınızla giriş yapın.</p>
-        <button class="btn" id="loginBtn" style="background-color: #4285F4;">Google ile Giriş Yap</button>
+        <h2>Sisteme Hoş Geldiniz</h2>
+        <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Verilerinize güvenli erişim için devam edin.</p>
+        <button class="btn" id="loginBtn" style="background-color: #4285F4; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3);">Google ile Giriş Yap</button>
     </div>
 
     <div id="mainApp">
-        <div class="form-section">
+        
+        <div id="tab-kayit" class="tab-content active">
+            <h3 style="margin-top:0; color:#333;">Yeni İş Ekle</h3>
             <div class="input-group">
                 <label>Müşteri / İş Adı</label>
                 <input type="text" id="musteri" placeholder="Örn: Hasan Usta">
             </div>
-            
             <div class="row">
                 <div class="input-group">
                     <label>Nereden</label>
-                    <input type="text" id="nereden" placeholder="Örn: Gaziantep">
+                    <input type="text" id="nereden" placeholder="Gaziantep">
                 </div>
                 <div class="input-group">
                     <label>Nereye</label>
-                    <input type="text" id="nereye" placeholder="Örn: İskenderun">
+                    <input type="text" id="nereye" placeholder="İskenderun">
                 </div>
             </div>
-
             <div class="row">
                 <div class="input-group">
-                    <label>Taşınan Kilo</label>
-                    <input type="number" id="kilo" placeholder="Örn: 1500">
+                    <label>Kilo</label>
+                    <input type="number" id="kilo" placeholder="1500">
                 </div>
                 <div class="input-group">
-                    <label>Birim Fiyat (TL)</label>
-                    <input type="number" id="fiyat" placeholder="Örn: 750">
+                    <label>Fiyat (TL)</label>
+                    <input type="number" id="fiyat" placeholder="750">
                 </div>
             </div>
-            
-            <button class="btn" id="kaydetBtn">İşi Kaydet</button>
+            <div class="input-group">
+                <label>Toplam Alınacak Tutar (TL)</label>
+                <input type="number" id="toplam" placeholder="Elle değiştirebilirsiniz">
+            </div>
+            <button class="btn" id="kaydetBtn">KAYDET</button>
         </div>
 
-        <div class="list-section">
-            <h3>Son Kayıtlar</h3>
-            <div id="kayitListesi">
-                </div>
+        <div id="tab-gecmis" class="tab-content">
+            <h3 style="margin-top:0; color:#333;">Son Yapılan İşler</h3>
+            <div id="kayitListesi"></div>
         </div>
+
+        <div id="tab-raporlar" class="tab-content">
+            
+            <div id="pdfAlinacakBolge">
+                <h3 style="margin-top:0; color:#333; text-align: center;">Performans Raporu</h3>
+                <div class="summary-grid">
+                    <div class="summary-box">
+                        <small>Bugün Kazanılan</small>
+                        <strong id="gunlukKazanc">0 TL</strong>
+                    </div>
+                    <div class="summary-box">
+                        <small>Bu Hafta Kazanılan</small>
+                        <strong id="haftalikKazanc">0 TL</strong>
+                    </div>
+                    <div class="summary-box full">
+                        <small>Bu Ay Toplam Ciro</small>
+                        <strong id="aylikKazanc">0 TL</strong>
+                    </div>
+                </div>
+
+                <div class="record-card" style="border-left: none; border-top: 4px solid #1565c0;">
+                    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">Müşteri Analizi (Tüm Zamanlar)</h4>
+                    <div id="musteriAnalizListesi">
+                        </div>
+                </div>
+            </div>
+
+            <button class="btn btn-pdf" onclick="indirPDF()">Raporu PDF Olarak İndir</button>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="sekmeDegistir('tab-kayit', this)">
+                <i>➕</i> Kayıt Ekle
+            </div>
+            <div class="nav-item" onclick="sekmeDegistir('tab-gecmis', this)">
+                <i>📋</i> Geçmiş
+            </div>
+            <div class="nav-item" onclick="sekmeDegistir('tab-raporlar', this)">
+                <i>📊</i> Raporlar
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -200,7 +258,6 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Senin Firebase Proje Bilgilerin
     const firebaseConfig = {
         apiKey: "AIzaSyDwhcGj0H8NIBnvE5zd8eT2NwNA0vHKqwQ",
         authDomain: "nakliyat-takip.firebaseapp.com",
@@ -211,126 +268,185 @@
         measurementId: "G-14GKET7SKL"
     };
 
-    // Firebase'i Başlat
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    // DOM Elemanları
     const loginPage = document.getElementById('loginPage');
     const mainApp = document.getElementById('mainApp');
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
-    const kaydetBtn = document.getElementById('kaydetBtn');
-    const kayitListesi = document.getElementById('kayitListesi');
+    
+    // Otomatik Hesaplama
+    const kiloInput = document.getElementById('kilo');
+    const fiyatInput = document.getElementById('fiyat');
+    const toplamInput = document.getElementById('toplam');
+
+    function otomatikHesapla() {
+        const k = parseFloat(kiloInput.value) || 0;
+        const f = parseFloat(fiyatInput.value) || 0;
+        if (k > 0 && f > 0) toplamInput.value = k * f;
+        else toplamInput.value = '';
+    }
+    kiloInput.addEventListener('input', otomatikHesapla);
+    fiyatInput.addEventListener('input', otomatikHesapla);
 
     let currentUser = null;
 
-    // 1. Kullanıcı Oturum Kontrolü
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
             loginPage.style.display = 'none';
             mainApp.style.display = 'block';
             logoutBtn.style.display = 'block';
-            verileriGetir(); // Giriş yapıldıysa verileri yükle
+            verileriGetir();
         } else {
             currentUser = null;
             loginPage.style.display = 'flex';
             mainApp.style.display = 'none';
             logoutBtn.style.display = 'none';
-            kayitListesi.innerHTML = '';
         }
     });
 
-    // Giriş Yapma İşlemi
-    loginBtn.addEventListener('click', () => {
-        signInWithPopup(auth, provider).catch(error => alert("Giriş hatası: " + error.message));
-    });
+    loginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
+    logoutBtn.addEventListener('click', () => signOut(auth));
 
-    // Çıkış Yapma İşlemi
-    logoutBtn.addEventListener('click', () => {
-        signOut(auth);
-    });
-
-    // 2. Veritabanına Veri Kaydetme (Dinamik Fiyat Hesaplamalı)
-    kaydetBtn.addEventListener('click', async () => {
+    document.getElementById('kaydetBtn').addEventListener('click', async () => {
         const musteri = document.getElementById('musteri').value;
-        const nereden = document.getElementById('nereden').value;
-        const nereye = document.getElementById('nereye').value;
-        const kilo = parseFloat(document.getElementById('kilo').value);
-        const fiyat = parseFloat(document.getElementById('fiyat').value);
+        const nereden = document.getElementById('nereden').value || "-";
+        const nereye = document.getElementById('nereye').value || "-";
+        const kilo = parseFloat(kiloInput.value);
+        const fiyat = parseFloat(fiyatInput.value) || 0;
+        const toplamTutar = parseFloat(toplamInput.value); 
 
-        if(!musteri || !nereden || !nereye || !kilo || !fiyat) {
-            alert("Lütfen tüm alanları doldurun!");
-            return;
-        }
-
-        // Toplam tutarı otomatik hesapla
-        const toplamTutar = kilo * fiyat;
+        if(!musteri || !kilo || !toplamTutar) return alert("Müşteri, Kilo ve Toplam Tutar zorunludur!");
 
         try {
             await addDoc(collection(db, "nakliyeIsleri"), {
                 userId: currentUser.uid, 
-                musteri: musteri,
+                musteri: musteri.toUpperCase(), // İsimleri büyük harfle kaydeder, analizde karışıklık olmaz
                 nereden: nereden,
                 nereye: nereye,
                 kilo: kilo,
                 fiyat: fiyat,
                 toplam: toplamTutar,
-                tarih: Date.now()
+                tarih: Date.now() 
             });
 
-            // Formu temizle
             document.getElementById('musteri').value = '';
             document.getElementById('nereden').value = '';
             document.getElementById('nereye').value = '';
-            document.getElementById('kilo').value = '';
-            document.getElementById('fiyat').value = '';
+            kiloInput.value = ''; fiyatInput.value = ''; toplamInput.value = '';
+            
+            // Kayıt bitince otomatik Geçmiş sekmesine atar
+            document.querySelectorAll('.nav-item')[1].click();
         } catch (error) {
-            alert("Kaydedilirken hata oluştu: " + error.message);
+            alert("Hata: " + error.message);
         }
     });
 
-    // 3. Verileri Gerçek Zamanlı Listeleme ve Silme
     function verileriGetir() {
         const q = query(collection(db, "nakliyeIsleri"), orderBy("tarih", "desc"));
         
         onSnapshot(q, (snapshot) => {
+            const kayitListesi = document.getElementById('kayitListesi');
+            const musteriAnalizListesi = document.getElementById('musteriAnalizListesi');
             kayitListesi.innerHTML = '';
+            
+            let gunlukTop = 0, haftalikTop = 0, aylikTop = 0;
+            let musteriVerileri = {}; // Müşteri analizi için sözlük oluşturduk
+            
+            const simdi = new Date();
+            const bugunBaslangic = new Date(simdi.getFullYear(), simdi.getMonth(), simdi.getDate()).getTime();
+            const birHaftaOnce = simdi.getTime() - (7 * 24 * 60 * 60 * 1000);
+            const buAyBaslangic = new Date(simdi.getFullYear(), simdi.getMonth(), 1).getTime();
+
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 
-                // Sadece giriş yapan kullanıcının verilerini göster
                 if (data.userId === currentUser.uid) {
+                    
+                    // Finansal Toplamlar
+                    if(data.tarih >= bugunBaslangic) gunlukTop += data.toplam;
+                    if(data.tarih >= birHaftaOnce) haftalikTop += data.toplam;
+                    if(data.tarih >= buAyBaslangic) aylikTop += data.toplam;
+
+                    // Müşteri Bazlı Gruplama
+                    if(!musteriVerileri[data.musteri]) {
+                        musteriVerileri[data.musteri] = { toplamKilo: 0, toplamKazanilan: 0 };
+                    }
+                    musteriVerileri[data.musteri].toplamKilo += data.kilo;
+                    musteriVerileri[data.musteri].toplamKazanilan += data.toplam;
+
+                    // Saat ve Dakika eklendi
+                    const tarihObje = new Date(data.tarih);
+                    const islemTarihi = tarihObje.toLocaleDateString('tr-TR') + ' ' + 
+                                        tarihObje.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+
                     const card = document.createElement('div');
                     card.className = 'record-card';
                     card.innerHTML = `
+                        <div class="record-date">${islemTarihi}</div>
                         <div class="record-info">
                             <h4>${data.musteri}</h4>
                             <div class="route-info">${data.nereden} ➔ ${data.nereye}</div>
-                            <p>${data.kilo.toLocaleString('tr-TR')} Kilo x ${data.fiyat.toLocaleString('tr-TR')} TL</p>
+                            <p>${data.kilo.toLocaleString('tr-TR')} Kilo (Birim: ${data.fiyat} ₺)</p>
                             <strong>${data.toplam.toLocaleString('tr-TR')} TL</strong>
                         </div>
-                        <div class="record-actions">
-                            <button class="delete-btn" data-id="${docSnap.id}">🗑️</button>
-                        </div>
+                        <button class="delete-btn" data-id="${docSnap.id}">🗑️</button>
                     `;
                     kayitListesi.appendChild(card);
                 }
             });
 
-            // Silme butonlarına olayları bağla
+            // Raporları Ekrana Bas
+            document.getElementById('gunlukKazanc').innerText = gunlukTop.toLocaleString('tr-TR') + ' TL';
+            document.getElementById('haftalikKazanc').innerText = haftalikTop.toLocaleString('tr-TR') + ' TL';
+            document.getElementById('aylikKazanc').innerText = aylikTop.toLocaleString('tr-TR') + ' TL';
+
+            // Müşteri Analizlerini Ekrana Bas
+            musteriAnalizListesi.innerHTML = '';
+            for (const [musteriAdi, analiz] of Object.entries(musteriVerileri)) {
+                // Tonaj hesabı
+                const tonCinsinden = (analiz.toplamKilo / 1000).toFixed(1);
+                musteriAnalizListesi.innerHTML += `
+                    <div class="customer-item">
+                        <div><b>${musteriAdi}</b> <br> <small style="color:#666">${tonCinsinden} Ton Taşındı</small></div>
+                        <span>${analiz.toplamKazanilan.toLocaleString('tr-TR')} TL</span>
+                    </div>
+                `;
+            }
+
             document.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const id = e.target.getAttribute('data-id');
-                    if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
-                        await deleteDoc(doc(db, "nakliyeIsleri", id));
-                    }
+                    if(confirm("Silmek istediğinize emin misiniz?")) await deleteDoc(doc(db, "nakliyeIsleri", id));
                 });
             });
         });
+    }
+
+    // PDF İndirme Fonksiyonunu global (window) yapıya bağladık
+    window.indirPDF = function() {
+        const eleman = document.getElementById('pdfAlinacakBolge');
+        const ayarlar = {
+            margin:       1,
+            filename:     'Fistik_Raporu.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        // html2pdf kütüphanesini tetikle
+        html2pdf().set(ayarlar).from(eleman).save();
+    }
+
+    // Sekme (Tab) Değiştirme Sistemi
+    window.sekmeDegistir = function(sekmeId, tiklananElement) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.getElementById(sekmeId).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        tiklananElement.classList.add('active');
     }
 </script>
 </body>
