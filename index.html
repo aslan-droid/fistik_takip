@@ -4,155 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fıstık Takip Sistemi</title>
+    <!-- Modern Yazı Tipi -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PDF İndirme Kütüphanesi -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* Modern UI Ayarları */
+        /* Genel Uygulama Tasarımı */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f2;
+            margin: 0; padding: 0;
+            display: flex; justify-content: center;
         }
         .app-container {
-            width: 100%;
-            max-width: 480px;
-            background-color: #ffffff;
-            min-height: 100vh;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            position: relative;
-            padding-bottom: 70px; /* Alt menü için boşluk */
+            width: 100%; max-width: 480px;
+            background-color: #ffffff; min-height: 100vh;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative; padding-bottom: 80px;
         }
         
-        /* Üst Bilgi */
+        /* Resimli Modern Üst Bilgi (Header) */
         .header {
-            background: linear-gradient(135deg, #2e7d32, #1b5e20);
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 20px;
-            font-weight: 700;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+            background: linear-gradient(rgba(33, 104, 38, 0.85), rgba(20, 68, 23, 0.95)), 
+                        url('https://images.unsplash.com/photo-1628189851616-56041ee2b406?q=80&w=800&auto=format&fit=crop') center/cover;
+            color: white; text-align: center;
+            padding: 35px 20px 25px 20px;
+            font-size: 22px; font-weight: 700;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.4);
             position: relative;
         }
+        .header p { margin: 5px 0 0 0; font-size: 13px; font-weight: 300; opacity: 0.9; }
         .logout-btn {
-            position: absolute;
-            right: 15px;
-            top: 22px;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 13px;
-            cursor: pointer;
+            position: absolute; right: 15px; top: 15px;
+            background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+            color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.3s;
         }
+        .logout-btn:hover { background: rgba(255,255,255,0.4); }
 
-        /* Sekme İçerikleri */
-        .tab-content {
-            display: none;
-            padding: 20px;
-            animation: fadeIn 0.3s;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* Sekme ve Form Tasarımları */
+        .tab-content { display: none; padding: 25px 20px; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Girdi ve Buton Tasarımları */
-        .row { display: flex; gap: 12px; }
+        .row { display: flex; gap: 15px; }
         .row .input-group { flex: 1; }
-        .input-group { margin-bottom: 16px; }
-        .input-group label { display: block; margin-bottom: 6px; color: #555; font-weight: 600; font-size: 13px; }
-        .input-group input {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            box-sizing: border-box;
-            font-size: 15px;
-            background-color: #f9f9f9;
-            transition: 0.3s;
+        .input-group { margin-bottom: 18px; }
+        .input-group label { display: block; margin-bottom: 8px; color: #444; font-weight: 600; font-size: 13px; }
+        .input-group input, .input-group select {
+            width: 100%; padding: 15px; border: 2px solid #eef2f0; border-radius: 14px;
+            box-sizing: border-box; font-size: 15px; font-family: 'Poppins', sans-serif;
+            background-color: #f9fbf9; transition: 0.3s; color: #222;
         }
-        .input-group input:focus { border-color: #2e7d32; outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(46,125,50,0.1); }
-        #toplam { background-color: #fff8e1; color: #d84315; font-weight: bold; border-color: #ffecb3; }
+        .input-group input:focus, .input-group select:focus {
+            border-color: #4caf50; outline: none; background-color: #fff; box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+        }
+        #toplam { background-color: #fef8e6; color: #d84315; font-weight: 700; border-color: #ffe082; font-size: 18px; }
 
+        /* Gelişmiş Butonlar */
         .btn {
-            width: 100%;
-            padding: 16px;
-            background-color: #2e7d32;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
-            transition: 0.2s;
+            width: 100%; padding: 16px; border: none; border-radius: 14px;
+            font-size: 16px; font-weight: 600; font-family: 'Poppins', sans-serif;
+            cursor: pointer; transition: all 0.2s; color: white;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
         }
-        .btn:active { transform: scale(0.98); }
-        .btn-pdf { background-color: #d32f2f; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3); margin-top: 15px;}
+        .btn:active { transform: scale(0.96); }
+        .btn-green { background: linear-gradient(135deg, #4caf50, #2e7d32); box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3); }
+        .btn-pdf-aylik { background: linear-gradient(135deg, #29b6f6, #0277bd); box-shadow: 0 6px 15px rgba(2, 119, 189, 0.3); margin-top: 15px; }
+        .btn-pdf-yillik { background: linear-gradient(135deg, #ef5350, #c62828); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.3); margin-top: 15px; }
 
-        /* Kart Tasarımları (Geçmiş & Rapor) */
+        /* Kayıt Kartları */
         .record-card {
-            background-color: #fff;
-            border: 1px solid #eee;
-            padding: 16px;
-            margin-bottom: 15px;
-            border-radius: 12px;
-            position: relative;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            border-left: 5px solid #2e7d32;
+            background-color: #fff; border: 1px solid #f0f0f0; padding: 18px; margin-bottom: 15px;
+            border-radius: 16px; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border-left: 6px solid #2e7d32; transition: 0.3s;
         }
-        .record-date { position: absolute; top: 12px; right: 16px; font-size: 11px; color: #999; font-weight: 600;}
-        .record-info h4 { margin: 0 0 6px 0; color: #222; font-size: 16px;}
-        .route-info { color: #555; font-size: 13px; margin-bottom: 8px;}
-        .record-info strong { color: #d84315; font-size: 17px; display: block; margin-top: 5px;}
-        .delete-btn { position: absolute; bottom: 12px; right: 16px; background: #ffebee; border: none; color: #c62828; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px; }
-
-        /* Rapor Özel Sınıfları */
-        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .summary-box { background: #e8f5e9; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #c8e6c9;}
-        .summary-box.full { grid-column: span 2; background: #e3f2fd; border-color: #bbdefb; }
-        .summary-box small { color: #555; font-size: 12px; font-weight: 600; display: block; margin-bottom: 5px;}
-        .summary-box strong { color: #1b5e20; font-size: 18px; }
-        .summary-box.full strong { color: #1565c0; }
+        .record-card.unpaid { border-left-color: #ff9800; background-color: #fffbf5; } 
+        .record-date { position: absolute; top: 15px; right: 18px; font-size: 11px; color: #888; font-weight: 500;}
+        .record-info h4 { margin: 0 0 6px 0; color: #111; font-size: 17px; font-weight: 600;}
+        .route-info { color: #555; font-size: 13px; margin-bottom: 8px; font-weight: 500;}
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-bottom: 10px; }
+        .badge.paid { background: #e8f5e9; color: #2e7d32; }
+        .badge.unpaid { background: #fff3e0; color: #e65100; }
+        .record-info strong { font-size: 18px; display: block; margin-top: 5px;}
         
-        /* Müşteri Listesi */
-        .customer-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #ddd; font-size: 14px;}
-        .customer-item:last-child { border-bottom: none; }
-        .customer-item span { font-weight: 600; color: #d84315;}
+        .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-tahsil { background: #4caf50; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-family: 'Poppins'; font-weight: 600; font-size: 12px; cursor: pointer; flex: 1;}
+        .delete-btn { background: #ffebee; border: none; color: #c62828; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;}
 
-        /* Alt Navigasyon (Tab Menü) */
+        /* Rapor Panosu */
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .summary-box { background: #fff; padding: 18px; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f0f0f0;}
+        .summary-box.warning { background: linear-gradient(135deg, #fff3e0, #ffe0b2); border: none; grid-column: span 2;}
+        .summary-box small { color: #666; font-size: 12px; font-weight: 600; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .summary-box strong { color: #222; font-size: 20px; font-weight: 700; }
+        .summary-box.warning strong { color: #e65100; }
+
+        /* Yeni Alt Menü (Tab Bar) */
         .bottom-nav {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            background: #fff;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            border-top: 1px solid #eee;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
-            border-bottom-left-radius: 15px;
-            border-bottom-right-radius: 15px;
+            position: absolute; bottom: 0; left: 0; right: 0; background: #fff; display: flex;
+            justify-content: space-around; padding: 12px 0 20px 0; border-top: 1px solid #f0f0f0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05); border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
         }
-        .nav-item {
-            text-align: center;
-            color: #888;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            flex: 1;
-            padding: 10px 0;
-        }
-        .nav-item.active { color: #2e7d32; }
-        .nav-item i { display: block; font-size: 20px; margin-bottom: 4px; font-style: normal; }
+        .nav-item { text-align: center; color: #b0bec5; font-size: 11px; font-weight: 600; cursor: pointer; flex: 1; transition: 0.3s; }
+        .nav-item.active { color: #2e7d32; transform: translateY(-3px); }
+        .nav-item i { display: block; font-size: 22px; margin-bottom: 5px; font-style: normal; }
 
         #loginPage { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; min-height: 70vh; }
         #mainApp { display: none; }
+
+        /* PDF Çıktıları İçin Sanal Arka Plan Alanı */
+        #pdfSanalAlan { position: absolute; left: -9999px; top: -9999px; width: 700px; background: white; padding: 40px; font-family: Arial, sans-serif; }
+        .pdf-baslik { text-align: center; color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 10px; margin-bottom: 20px; }
+        .pdf-tablo { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .pdf-tablo th, .pdf-tablo td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .pdf-tablo th { background-color: #f5f5f5; color: #333; }
+        .pdf-toplam { text-align: right; font-size: 18px; font-weight: bold; color: #d84315; }
     </style>
 </head>
 <body>
@@ -160,103 +127,136 @@
 <div class="app-container">
     <div class="header">
         Fıstık Nakliye
+        <p>Profesyonel Yük Takip Sistemi</p>
         <button id="logoutBtn" class="logout-btn" style="display: none;">Çıkış Yap</button>
     </div>
 
+    <!-- GİRİŞ EKRANI -->
     <div id="loginPage">
-        <h2>Sisteme Hoş Geldiniz</h2>
-        <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Verilerinize güvenli erişim için devam edin.</p>
-        <button class="btn" id="loginBtn" style="background-color: #4285F4; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3);">Google ile Giriş Yap</button>
+        <img src="https://cdn-icons-png.flaticon.com/512/2830/2830305.png" alt="Kamyon" width="80" style="margin-bottom: 20px; opacity: 0.8;">
+        <h2 style="margin-top:0;">Sisteme Giriş</h2>
+        <button class="btn btn-green" id="loginBtn" style="background: #4285F4; box-shadow: 0 6px 15px rgba(66, 133, 244, 0.3);">Google ile Giriş Yap</button>
     </div>
 
+    <!-- ANA UYGULAMA -->
     <div id="mainApp">
         
+        <!-- YENİ KAYIT SEKMESİ -->
         <div id="tab-kayit" class="tab-content active">
-            <h3 style="margin-top:0; color:#333;">Yeni İş Ekle</h3>
             <div class="input-group">
                 <label>Müşteri / İş Adı</label>
-                <input type="text" id="musteri" placeholder="Örn: Hasan Usta">
+                <input type="text" id="musteri" placeholder="">
             </div>
             <div class="row">
                 <div class="input-group">
                     <label>Nereden</label>
-                    <input type="text" id="nereden" placeholder="Gaziantep">
+                    <input type="text" id="nereden" placeholder="">
                 </div>
                 <div class="input-group">
                     <label>Nereye</label>
-                    <input type="text" id="nereye" placeholder="İskenderun">
+                    <input type="text" id="nereye" placeholder="">
                 </div>
             </div>
             <div class="row">
                 <div class="input-group">
                     <label>Kilo</label>
-                    <input type="number" id="kilo" placeholder="1500">
+                    <input type="number" id="kilo" placeholder="">
                 </div>
                 <div class="input-group">
-                    <label>Fiyat (TL)</label>
-                    <input type="number" id="fiyat" placeholder="750">
+                    <label>Fiyat (TL / Ton)</label>
+                    <input type="number" id="fiyat" placeholder="">
                 </div>
             </div>
             <div class="input-group">
-                <label>Toplam Alınacak Tutar (TL)</label>
-                <input type="number" id="toplam" placeholder="Elle değiştirebilirsiniz">
+                <label>Ödeme Durumu</label>
+                <select id="odemeDurumu">
+                    <option value="alindi">Peşin Alındı (Ödendi)</option>
+                    <option value="bekliyor">Sonra Alınacak (Veresiye)</option>
+                </select>
             </div>
-            <button class="btn" id="kaydetBtn">KAYDET</button>
+            <div class="input-group">
+                <label>Toplam Oluşan Tutar (TL)</label>
+                <input type="number" id="toplam" placeholder="">
+            </div>
+            <button class="btn btn-green" id="kaydetBtn">İşi Kaydet ✔️</button>
         </div>
 
+        <!-- GEÇMİŞ SEKMESİ -->
         <div id="tab-gecmis" class="tab-content">
-            <h3 style="margin-top:0; color:#333;">Son Yapılan İşler</h3>
+            <h3 style="margin-top:0; color:#333; font-weight: 600;">Geçmiş Tüm İşler</h3>
             <div id="kayitListesi"></div>
         </div>
 
+        <!-- ALACAKLAR SEKMESİ -->
+        <div id="tab-alacaklar" class="tab-content">
+            <h3 style="margin-top:0; color:#e65100; font-weight: 600;">Tahsil Edilecekler</h3>
+            <div class="summary-box warning" style="margin-bottom: 20px;">
+                <small>Bekleyen Toplam Alacak</small>
+                <strong id="toplamAlacakPanosu">0 TL</strong>
+            </div>
+            <div id="alacakListesi"></div>
+        </div>
+
+        <!-- RAPORLAR SEKMESİ -->
         <div id="tab-raporlar" class="tab-content">
-            
-            <div id="pdfAlinacakBolge">
-                <h3 style="margin-top:0; color:#333; text-align: center;">Performans Raporu</h3>
-                <div class="summary-grid">
-                    <div class="summary-box">
-                        <small>Bugün Kazanılan</small>
-                        <strong id="gunlukKazanc">0 TL</strong>
-                    </div>
-                    <div class="summary-box">
-                        <small>Bu Hafta Kazanılan</small>
-                        <strong id="haftalikKazanc">0 TL</strong>
-                    </div>
-                    <div class="summary-box full">
-                        <small>Bu Ay Toplam Ciro</small>
-                        <strong id="aylikKazanc">0 TL</strong>
-                    </div>
+            <h3 style="margin-top:0; color:#333; text-align: center; font-weight: 600;">Performans Özeti</h3>
+            <p style="text-align:center; font-size:12px; color:#666; margin-top:-10px;">(Veresiye işler de ciroya dahildir)</p>
+            <div class="summary-grid">
+                <div class="summary-box">
+                    <small>Bugün</small>
+                    <strong id="gunlukKazanc">0 TL</strong>
                 </div>
-
-                <div class="record-card" style="border-left: none; border-top: 4px solid #1565c0;">
-                    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">Müşteri Analizi (Tüm Zamanlar)</h4>
-                    <div id="musteriAnalizListesi">
-                        </div>
+                <div class="summary-box">
+                    <small>Bu Hafta</small>
+                    <strong id="haftalikKazanc">0 TL</strong>
+                </div>
+                <div class="summary-box">
+                    <small>Bu Ay</small>
+                    <strong id="aylikKazanc">0 TL</strong>
+                </div>
+                <div class="summary-box">
+                    <small>Bu Yıl</small>
+                    <strong id="yillikKazanc">0 TL</strong>
                 </div>
             </div>
-
-            <button class="btn btn-pdf" onclick="indirPDF()">Raporu PDF Olarak İndir</button>
+            <button class="btn btn-pdf-aylik" onclick="indirAylikPDF()">📊 Aylık PDF İndir</button>
+            <button class="btn btn-pdf-yillik" onclick="indirYillikPDF()">📈 Yıllık PDF İndir</button>
         </div>
 
+        <!-- ALT MENÜ -->
         <div class="bottom-nav">
-            <div class="nav-item active" onclick="sekmeDegistir('tab-kayit', this)">
-                <i>➕</i> Kayıt Ekle
-            </div>
-            <div class="nav-item" onclick="sekmeDegistir('tab-gecmis', this)">
-                <i>📋</i> Geçmiş
-            </div>
-            <div class="nav-item" onclick="sekmeDegistir('tab-raporlar', this)">
-                <i>📊</i> Raporlar
-            </div>
+            <div class="nav-item active" onclick="sekmeDegistir('tab-kayit', this)"><i>➕</i>Kayıt</div>
+            <div class="nav-item" onclick="sekmeDegistir('tab-gecmis', this)"><i>📋</i>Geçmiş</div>
+            <div class="nav-item" onclick="sekmeDegistir('tab-alacaklar', this)"><i>⏳</i>Alacaklar</div>
+            <div class="nav-item" onclick="sekmeDegistir('tab-raporlar', this)"><i>📊</i>Rapor</div>
         </div>
+    </div>
+</div>
 
+<!-- PDF Şablonları (Gizli) -->
+<div id="pdfSanalAlan">
+    <div id="pdfAylikSablon" style="display: none;">
+        <h2 class="pdf-baslik" id="aylikPdfBaslik">Aylık Rapor</h2>
+        <table class="pdf-tablo">
+            <thead><tr><th>Müşteri / İş Adı</th><th>Taşınan Tonaj</th><th>Oluşan Ücret</th></tr></thead>
+            <tbody id="aylikPdfTabloGövde"></tbody>
+        </table>
+        <div class="pdf-toplam" id="aylikPdfGenelToplam"></div>
+    </div>
+    <div id="pdfYillikSablon" style="display: none;">
+        <h2 class="pdf-baslik" id="yillikPdfBaslik">Yıllık Rapor</h2>
+        <table class="pdf-tablo">
+            <thead><tr><th>Aylar</th><th>O Ay Taşınan Tonaj</th><th>O Ay Oluşan Ücret</th></tr></thead>
+            <tbody id="yillikPdfTabloGövde"></tbody>
+        </table>
+        <div class="pdf-toplam" id="yillikPdfGenelToplam"></div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDwhcGj0H8NIBnvE5zd8eT2NwNA0vHKqwQ",
@@ -273,20 +273,15 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    const loginPage = document.getElementById('loginPage');
-    const mainApp = document.getElementById('mainApp');
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    
-    // Otomatik Hesaplama
     const kiloInput = document.getElementById('kilo');
     const fiyatInput = document.getElementById('fiyat');
     const toplamInput = document.getElementById('toplam');
 
+    // Ton Hesaplaması
     function otomatikHesapla() {
-        const k = parseFloat(kiloInput.value) || 0;
-        const f = parseFloat(fiyatInput.value) || 0;
-        if (k > 0 && f > 0) toplamInput.value = k * f;
+        const kilo = parseFloat(kiloInput.value) || 0;
+        const tonFiyati = parseFloat(fiyatInput.value) || 0;
+        if (kilo > 0 && tonFiyati > 0) toplamInput.value = (kilo / 1000) * tonFiyati;
         else toplamInput.value = '';
     }
     kiloInput.addEventListener('input', otomatikHesapla);
@@ -297,151 +292,191 @@
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
-            loginPage.style.display = 'none';
-            mainApp.style.display = 'block';
-            logoutBtn.style.display = 'block';
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('logoutBtn').style.display = 'block';
             verileriGetir();
         } else {
             currentUser = null;
-            loginPage.style.display = 'flex';
-            mainApp.style.display = 'none';
-            logoutBtn.style.display = 'none';
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'none';
         }
     });
 
-    loginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
-    logoutBtn.addEventListener('click', () => signOut(auth));
+    document.getElementById('loginBtn').addEventListener('click', () => signInWithPopup(auth, provider));
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
+    // Kayıt İşlemi
     document.getElementById('kaydetBtn').addEventListener('click', async () => {
         const musteri = document.getElementById('musteri').value;
-        const nereden = document.getElementById('nereden').value || "-";
-        const nereye = document.getElementById('nereye').value || "-";
+        const nereden = document.getElementById('nereden').value;
+        const nereye = document.getElementById('nereye').value;
         const kilo = parseFloat(kiloInput.value);
         const fiyat = parseFloat(fiyatInput.value) || 0;
         const toplamTutar = parseFloat(toplamInput.value); 
+        const odemeAlindiMi = document.getElementById('odemeDurumu').value === "alindi";
 
-        if(!musteri || !kilo || !toplamTutar) return alert("Müşteri, Kilo ve Toplam Tutar zorunludur!");
+        if(!musteri || !kilo || !toplamTutar) return alert("Müşteri, Kilo ve Toplam Tutar boş bırakılamaz.");
 
         try {
             await addDoc(collection(db, "nakliyeIsleri"), {
                 userId: currentUser.uid, 
-                musteri: musteri.toUpperCase(), // İsimleri büyük harfle kaydeder, analizde karışıklık olmaz
-                nereden: nereden,
-                nereye: nereye,
-                kilo: kilo,
-                fiyat: fiyat,
-                toplam: toplamTutar,
+                musteri: musteri.toUpperCase(),
+                nereden: nereden, nereye: nereye,
+                kilo: kilo, fiyat: fiyat, toplam: toplamTutar,
+                odemeAlindi: odemeAlindiMi, 
                 tarih: Date.now() 
             });
 
             document.getElementById('musteri').value = '';
-            document.getElementById('nereden').value = '';
+            document.getElementById('nereden').value = ''; 
             document.getElementById('nereye').value = '';
             kiloInput.value = ''; fiyatInput.value = ''; toplamInput.value = '';
             
-            // Kayıt bitince otomatik Geçmiş sekmesine atar
-            document.querySelectorAll('.nav-item')[1].click();
-        } catch (error) {
-            alert("Hata: " + error.message);
-        }
+            // Eğer parası alınmadıysa (veresiye) Alacaklar sekmesine at, alındıysa Geçmiş'e.
+            if(!odemeAlindiMi) document.querySelectorAll('.nav-item')[2].click();
+            else document.querySelectorAll('.nav-item')[1].click();
+
+        } catch (error) { alert("Hata: " + error.message); }
     });
+
+    const aylarIsim = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
     function verileriGetir() {
         const q = query(collection(db, "nakliyeIsleri"), orderBy("tarih", "desc"));
         
         onSnapshot(q, (snapshot) => {
             const kayitListesi = document.getElementById('kayitListesi');
-            const musteriAnalizListesi = document.getElementById('musteriAnalizListesi');
+            const alacakListesi = document.getElementById('alacakListesi');
             kayitListesi.innerHTML = '';
+            alacakListesi.innerHTML = '';
             
-            let gunlukTop = 0, haftalikTop = 0, aylikTop = 0;
-            let musteriVerileri = {}; // Müşteri analizi için sözlük oluşturduk
-            
+            let gunlukTop = 0, haftalikTop = 0, aylikTop = 0, yillikTop = 0, toplamBekleyenAlacak = 0;
             const simdi = new Date();
+            const mevcutYil = simdi.getFullYear();
+            const mevcutAy = simdi.getMonth();
             const bugunBaslangic = new Date(simdi.getFullYear(), simdi.getMonth(), simdi.getDate()).getTime();
             const birHaftaOnce = simdi.getTime() - (7 * 24 * 60 * 60 * 1000);
-            const buAyBaslangic = new Date(simdi.getFullYear(), simdi.getMonth(), 1).getTime();
+
+            let pdfAylikMusteriler = {}; 
+            let pdfYillikAylar = {}; 
+            for(let i=0; i<12; i++) pdfYillikAylar[i] = { kilo: 0, ciro: 0 }; 
 
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
-                
                 if (data.userId === currentUser.uid) {
                     
-                    // Finansal Toplamlar
+                    const tarihObje = new Date(data.tarih);
+                    const islemYili = tarihObje.getFullYear();
+                    const islemAyi = tarihObje.getMonth();
+                    const islemTarihiFormati = tarihObje.toLocaleDateString('tr-TR') + ' ' + tarihObje.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+
+                    // Kart Tasarımı
+                    const odemeDurumuHtml = data.odemeAlindi 
+                        ? `<span class="badge paid">✔️ Ödendi</span>` 
+                        : `<span class="badge unpaid">⏳ Bekliyor</span>`;
+                    
+                    const htmlKart = `
+                        <div class="record-card ${data.odemeAlindi ? '' : 'unpaid'}">
+                            <div class="record-date">${islemTarihiFormati}</div>
+                            <div class="record-info">
+                                ${odemeDurumuHtml}
+                                <h4>${data.musteri}</h4>
+                                <div class="route-info">${data.nereden || '-'} ➔ ${data.nereye || '-'}</div>
+                                <div style="color: #666; font-size: 13px;">${data.kilo} Kilo (Birim: ${data.fiyat} ₺/Ton)</div>
+                                <strong style="color: ${data.odemeAlindi ? '#2e7d32' : '#d84315'};">${data.toplam.toLocaleString('tr-TR')} TL</strong>
+                            </div>
+                            <div class="action-buttons">
+                                ${!data.odemeAlindi ? `<button class="btn-tahsil" onclick="tahsilEt('${docSnap.id}')">💰 Tahsil Et</button>` : ''}
+                                <button class="delete-btn" onclick="silIslem('${docSnap.id}')">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Geçmiş listesine ekle
+                    kayitListesi.innerHTML += htmlKart;
+
+                    // Ödeme alınmadıysa alacak listesine ekle
+                    if(!data.odemeAlindi) {
+                        alacakListesi.innerHTML += htmlKart;
+                        toplamBekleyenAlacak += data.toplam;
+                    }
+
+                    // TÜM İŞLER Rapor Pano Hesaplamalarına (Ciroya) Eklenir (Veresiye veya Peşin fark etmeksizin)
                     if(data.tarih >= bugunBaslangic) gunlukTop += data.toplam;
                     if(data.tarih >= birHaftaOnce) haftalikTop += data.toplam;
-                    if(data.tarih >= buAyBaslangic) aylikTop += data.toplam;
+                    if(islemYili === mevcutYil && islemAyi === mevcutAy) aylikTop += data.toplam;
+                    if(islemYili === mevcutYil) yillikTop += data.toplam;
 
-                    // Müşteri Bazlı Gruplama
-                    if(!musteriVerileri[data.musteri]) {
-                        musteriVerileri[data.musteri] = { toplamKilo: 0, toplamKazanilan: 0 };
+                    if(islemYili === mevcutYil && islemAyi === mevcutAy) {
+                        if(!pdfAylikMusteriler[data.musteri]) pdfAylikMusteriler[data.musteri] = { kilo: 0, ciro: 0 };
+                        pdfAylikMusteriler[data.musteri].kilo += data.kilo;
+                        pdfAylikMusteriler[data.musteri].ciro += data.toplam;
                     }
-                    musteriVerileri[data.musteri].toplamKilo += data.kilo;
-                    musteriVerileri[data.musteri].toplamKazanilan += data.toplam;
 
-                    // Saat ve Dakika eklendi
-                    const tarihObje = new Date(data.tarih);
-                    const islemTarihi = tarihObje.toLocaleDateString('tr-TR') + ' ' + 
-                                        tarihObje.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-
-                    const card = document.createElement('div');
-                    card.className = 'record-card';
-                    card.innerHTML = `
-                        <div class="record-date">${islemTarihi}</div>
-                        <div class="record-info">
-                            <h4>${data.musteri}</h4>
-                            <div class="route-info">${data.nereden} ➔ ${data.nereye}</div>
-                            <p>${data.kilo.toLocaleString('tr-TR')} Kilo (Birim: ${data.fiyat} ₺)</p>
-                            <strong>${data.toplam.toLocaleString('tr-TR')} TL</strong>
-                        </div>
-                        <button class="delete-btn" data-id="${docSnap.id}">🗑️</button>
-                    `;
-                    kayitListesi.appendChild(card);
+                    if(islemYili === mevcutYil) {
+                        pdfYillikAylar[islemAyi].kilo += data.kilo;
+                        pdfYillikAylar[islemAyi].ciro += data.toplam;
+                    }
                 }
             });
 
-            // Raporları Ekrana Bas
+            // Ekranları Güncelle
+            document.getElementById('toplamAlacakPanosu').innerText = toplamBekleyenAlacak.toLocaleString('tr-TR') + ' TL';
+            
             document.getElementById('gunlukKazanc').innerText = gunlukTop.toLocaleString('tr-TR') + ' TL';
             document.getElementById('haftalikKazanc').innerText = haftalikTop.toLocaleString('tr-TR') + ' TL';
             document.getElementById('aylikKazanc').innerText = aylikTop.toLocaleString('tr-TR') + ' TL';
+            document.getElementById('yillikKazanc').innerText = yillikTop.toLocaleString('tr-TR') + ' TL';
 
-            // Müşteri Analizlerini Ekrana Bas
-            musteriAnalizListesi.innerHTML = '';
-            for (const [musteriAdi, analiz] of Object.entries(musteriVerileri)) {
-                // Tonaj hesabı
-                const tonCinsinden = (analiz.toplamKilo / 1000).toFixed(1);
-                musteriAnalizListesi.innerHTML += `
-                    <div class="customer-item">
-                        <div><b>${musteriAdi}</b> <br> <small style="color:#666">${tonCinsinden} Ton Taşındı</small></div>
-                        <span>${analiz.toplamKazanilan.toLocaleString('tr-TR')} TL</span>
-                    </div>
-                `;
+            // PDF Tablolarını Doldur
+            document.getElementById('aylikPdfBaslik').innerText = `${aylarIsim[mevcutAy]} ${mevcutYil} - Fıstık Taşıma Özeti`;
+            const aylikGövde = document.getElementById('aylikPdfTabloGövde');
+            aylikGövde.innerHTML = '';
+            for (const [isim, deger] of Object.entries(pdfAylikMusteriler)) {
+                aylikGövde.innerHTML += `<tr><td><b>${isim}</b></td><td>${(deger.kilo / 1000).toFixed(2)} Ton</td><td>${deger.ciro.toLocaleString('tr-TR')} TL</td></tr>`;
             }
+            document.getElementById('aylikPdfGenelToplam').innerText = `GENEL TOPLAM CİRO: ${aylikTop.toLocaleString('tr-TR')} TL`;
 
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    if(confirm("Silmek istediğinize emin misiniz?")) await deleteDoc(doc(db, "nakliyeIsleri", id));
-                });
-            });
+            document.getElementById('yillikPdfBaslik').innerText = `${mevcutYil} Yılı - Tüm Aylar Fıstık Raporu`;
+            const yillikGövde = document.getElementById('yillikPdfTabloGövde');
+            yillikGövde.innerHTML = '';
+            for (let i = 0; i < 12; i++) {
+                if(pdfYillikAylar[i].kilo > 0) {
+                    yillikGövde.innerHTML += `<tr><td><b>${aylarIsim[i]}</b></td><td>${(pdfYillikAylar[i].kilo / 1000).toFixed(2)} Ton</td><td>${pdfYillikAylar[i].ciro.toLocaleString('tr-TR')} TL</td></tr>`;
+                }
+            }
+            document.getElementById('yillikPdfGenelToplam').innerText = `YILLIK GENEL CİRO: ${yillikTop.toLocaleString('tr-TR')} TL`;
         });
     }
 
-    // PDF İndirme Fonksiyonunu global (window) yapıya bağladık
-    window.indirPDF = function() {
-        const eleman = document.getElementById('pdfAlinacakBolge');
-        const ayarlar = {
-            margin:       1,
-            filename:     'Fistik_Raporu.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
-        // html2pdf kütüphanesini tetikle
-        html2pdf().set(ayarlar).from(eleman).save();
+    // Parayı Tahsil Etme Fonksiyonu
+    window.tahsilEt = async function(id) {
+        if(confirm("Parayı teslim aldınız mı? İşlem ödendi olarak işaretlenecek.")) {
+            await updateDoc(doc(db, "nakliyeIsleri", id), { odemeAlindi: true });
+        }
     }
 
-    // Sekme (Tab) Değiştirme Sistemi
+    // Silme Fonksiyonu
+    window.silIslem = async function(id) {
+        if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
+            await deleteDoc(doc(db, "nakliyeIsleri", id));
+        }
+    }
+
+    window.indirAylikPDF = function() {
+        const sablon = document.getElementById('pdfAylikSablon');
+        sablon.style.display = 'block'; 
+        html2pdf().set({ margin: 1, filename: 'Aylik_Rapor.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(sablon).save().then(() => { sablon.style.display = 'none'; });
+    }
+
+    window.indirYillikPDF = function() {
+        const sablon = document.getElementById('pdfYillikSablon');
+        sablon.style.display = 'block';
+        html2pdf().set({ margin: 1, filename: 'Yillik_Rapor.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(sablon).save().then(() => { sablon.style.display = 'none'; });
+    }
+
     window.sekmeDegistir = function(sekmeId, tiklananElement) {
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
         document.getElementById(sekmeId).classList.add('active');
