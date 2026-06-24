@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fıstık Takip Sistemi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: #ffffff;
+            min-height: 100vh;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #2e7d32;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            position: relative;
+        }
+        .logout-btn {
+            position: absolute;
+            right: 15px;
+            top: 22px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .form-section, .list-section {
+            padding: 20px;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+        .row .input-group {
+            flex: 1;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #1b5e20;
+        }
+        .list-section h3 {
+            margin-top: 0;
+            color: #444;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .record-card {
+            background-color: #f9f9f9;
+            border-left: 5px solid #2e7d32;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .record-info h4 {
+            margin: 0 0 5px 0;
+            color: #222;
+        }
+        .route-info {
+            margin: 0 0 5px 0;
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .record-info p {
+            margin: 0 0 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .record-info strong {
+            color: #2e7d32;
+            font-size: 16px;
+        }
+        .record-actions button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .delete-btn { color: #c62828; }
+        
+        #loginPage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            min-height: 70vh;
+        }
+        #mainApp {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        Fıstık Nakliye
+        <button id="logoutBtn" class="logout-btn" style="display: none;">Çıkış</button>
+    </div>
+
+    <div id="loginPage">
+        <h2>Fıstık Takip Sistemine Hoş Geldiniz</h2>
+        <p>Verilerinizin güvenle saklanması için lütfen Google hesabınızla giriş yapın.</p>
+        <button class="btn" id="loginBtn" style="background-color: #4285F4;">Google ile Giriş Yap</button>
+    </div>
+
+    <div id="mainApp">
+        <div class="form-section">
+            <div class="input-group">
+                <label>Müşteri / İş Adı</label>
+                <input type="text" id="musteri" placeholder="Örn: Hasan Usta">
+            </div>
+            
+            <div class="row">
+                <div class="input-group">
+                    <label>Nereden</label>
+                    <input type="text" id="nereden" placeholder="Örn: Gaziantep">
+                </div>
+                <div class="input-group">
+                    <label>Nereye</label>
+                    <input type="text" id="nereye" placeholder="Örn: İskenderun">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-group">
+                    <label>Taşınan Kilo</label>
+                    <input type="number" id="kilo" placeholder="Örn: 1500">
+                </div>
+                <div class="input-group">
+                    <label>Birim Fiyat (TL)</label>
+                    <input type="number" id="fiyat" placeholder="Örn: 750">
+                </div>
+            </div>
+            
+            <button class="btn" id="kaydetBtn">İşi Kaydet</button>
+        </div>
+
+        <div class="list-section">
+            <h3>Son Kayıtlar</h3>
+            <div id="kayitListesi">
+                </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Senin Firebase Proje Bilgilerin
+    const firebaseConfig = {
+        apiKey: "AIzaSyDwhcGj0H8NIBnvE5zd8eT2NwNA0vHKqwQ",
+        authDomain: "nakliyat-takip.firebaseapp.com",
+        projectId: "nakliyat-takip",
+        storageBucket: "nakliyat-takip.firebasestorage.app",
+        messagingSenderId: "445938511813",
+        appId: "1:445938511813:web:c515da0e0cb6af9f4665ac",
+        measurementId: "G-14GKET7SKL"
+    };
+
+    // Firebase'i Başlat
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    // DOM Elemanları
+    const loginPage = document.getElementById('loginPage');
+    const mainApp = document.getElementById('mainApp');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const kaydetBtn = document.getElementById('kaydetBtn');
+    const kayitListesi = document.getElementById('kayitListesi');
+
+    let currentUser = null;
+
+    // 1. Kullanıcı Oturum Kontrolü
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            loginPage.style.display = 'none';
+            mainApp.style.display = 'block';
+            logoutBtn.style.display = 'block';
+            verileriGetir(); // Giriş yapıldıysa verileri yükle
+        } else {
+            currentUser = null;
+            loginPage.style.display = 'flex';
+            mainApp.style.display = 'none';
+            logoutBtn.style.display = 'none';
+            kayitListesi.innerHTML = '';
+        }
+    });
+
+    // Giriş Yapma İşlemi
+    loginBtn.addEventListener('click', () => {
+        signInWithPopup(auth, provider).catch(error => alert("Giriş hatası: " + error.message));
+    });
+
+    // Çıkış Yapma İşlemi
+    logoutBtn.addEventListener('click', () => {
+        signOut(auth);
+    });
+
+    // 2. Veritabanına Veri Kaydetme (Dinamik Fiyat Hesaplamalı)
+    kaydetBtn.addEventListener('click', async () => {
+        const musteri = document.getElementById('musteri').value;
+        const nereden = document.getElementById('nereden').value;
+        const nereye = document.getElementById('nereye').value;
+        const kilo = parseFloat(document.getElementById('kilo').value);
+        const fiyat = parseFloat(document.getElementById('fiyat').value);
+
+        if(!musteri || !nereden || !nereye || !kilo || !fiyat) {
+            alert("Lütfen tüm alanları doldurun!");
+            return;
+        }
+
+        // Toplam tutarı otomatik hesapla
+        const toplamTutar = kilo * fiyat;
+
+        try {
+            await addDoc(collection(db, "nakliyeIsleri"), {
+                userId: currentUser.uid, 
+                musteri: musteri,
+                nereden: nereden,
+                nereye: nereye,
+                kilo: kilo,
+                fiyat: fiyat,
+                toplam: toplamTutar,
+                tarih: Date.now()
+            });
+
+            // Formu temizle
+            document.getElementById('musteri').value = '';
+            document.getElementById('nereden').value = '';
+            document.getElementById('nereye').value = '';
+            document.getElementById('kilo').value = '';
+            document.getElementById('fiyat').value = '';
+        } catch (error) {
+            alert("Kaydedilirken hata oluştu: " + error.message);
+        }
+    });
+
+    // 3. Verileri Gerçek Zamanlı Listeleme ve Silme
+    function verileriGetir() {
+        const q = query(collection(db, "nakliyeIsleri"), orderBy("tarih", "desc"));
+        
+        onSnapshot(q, (snapshot) => {
+            kayitListesi.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                
+                // Sadece giriş yapan kullanıcının verilerini göster
+                if (data.userId === currentUser.uid) {
+                    const card = document.createElement('div');
+                    card.className = 'record-card';
+                    card.innerHTML = `
+                        <div class="record-info">
+                            <h4>${data.musteri}</h4>
+                            <div class="route-info">${data.nereden} ➔ ${data.nereye}</div>
+                            <p>${data.kilo.toLocaleString('tr-TR')} Kilo x ${data.fiyat.toLocaleString('tr-TR')} TL</p>
+                            <strong>${data.toplam.toLocaleString('tr-TR')} TL</strong>
+                        </div>
+                        <div class="record-actions">
+                            <button class="delete-btn" data-id="${docSnap.id}">🗑️</button>
+                        </div>
+                    `;
+                    kayitListesi.appendChild(card);
+                }
+            });
+
+            // Silme butonlarına olayları bağla
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
+                        await deleteDoc(doc(db, "nakliyeIsleri", id));
+                    }
+                });
+            });
+        });
+    }
+</script>
+</body>
+</html>
