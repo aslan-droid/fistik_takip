@@ -3,6 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Telefonda uygulama gibi görünmesi için gerekli etiketler -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#216826">
+    
+    <!-- UYGULAMA İKONU KODLARI BURADA -->
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/6866/6866444.png" type="image/png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/6866/6866444.png">
+    <meta name="msapplication-TileImage" content="https://cdn-icons-png.flaticon.com/512/6866/6866444.png">
+
     <title>Fıstık Takip Sistemi</title>
     <!-- Modern Yazı Tipi -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -131,9 +141,9 @@
         <button id="logoutBtn" class="logout-btn" style="display: none;">Çıkış Yap</button>
     </div>
 
-    <!-- GİRİŞ EKRANI -->
+    <!-- GİRİŞ EKRANI (Fıstık İkonu) -->
     <div id="loginPage">
-        <img src="https://cdn-icons-png.flaticon.com/512/2830/2830305.png" alt="Kamyon" width="80" style="margin-bottom: 20px; opacity: 0.8;">
+        <img src="https://cdn-icons-png.flaticon.com/512/6866/6866444.png" alt="Antep Fıstığı" width="90" style="margin-bottom: 20px; opacity: 0.9;">
         <h2 style="margin-top:0;">Sisteme Giriş</h2>
         <button class="btn btn-green" id="loginBtn" style="background: #4285F4; box-shadow: 0 6px 15px rgba(66, 133, 244, 0.3);">Google ile Giriş Yap</button>
     </div>
@@ -334,7 +344,6 @@
             document.getElementById('nereye').value = '';
             kiloInput.value = ''; fiyatInput.value = ''; toplamInput.value = '';
             
-            // Eğer parası alınmadıysa (veresiye) Alacaklar sekmesine at, alındıysa Geçmiş'e.
             if(!odemeAlindiMi) document.querySelectorAll('.nav-item')[2].click();
             else document.querySelectorAll('.nav-item')[1].click();
 
@@ -403,7 +412,7 @@
                         toplamBekleyenAlacak += data.toplam;
                     }
 
-                    // TÜM İŞLER Rapor Pano Hesaplamalarına (Ciroya) Eklenir (Veresiye veya Peşin fark etmeksizin)
+                    // TÜM İŞLER Rapor Pano Hesaplamalarına (Ciroya) Eklenir
                     if(data.tarih >= bugunBaslangic) gunlukTop += data.toplam;
                     if(data.tarih >= birHaftaOnce) haftalikTop += data.toplam;
                     if(islemYili === mevcutYil && islemAyi === mevcutAy) aylikTop += data.toplam;
