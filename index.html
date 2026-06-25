@@ -113,14 +113,23 @@
         #loginPage { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; min-height: 70vh; }
         #mainApp { display: none; }
 
-        /* PDF Çıktıları İçin Sanal Arka Plan Alanı */
-        #pdfSanalAlan { position: absolute; left: -9999px; top: -9999px; width: 750px; background: white; padding: 40px; font-family: Arial, sans-serif; }
+        /* PDF ÇIKTILARI ÖZEL CSS (BÖLÜNMEYİ ÖNLEYİCİ) */
+        #pdfSanalAlan { position: absolute; left: -9999px; top: 0; width: 750px; background: white; padding: 20px; font-family: Arial, sans-serif; }
         .pdf-baslik { text-align: center; color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 10px; margin-bottom: 20px; }
-        .pdf-tablo { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        
+        /* Müşteri Grupları */
+        .musteri-rapor-grubu { margin-bottom: 30px; page-break-inside: avoid; } /* SAYFA KESİLMESİNİ ENGELLER */
+        .musteri-baslik { background-color: #2e7d32; color: white; padding: 10px 15px; margin: 0; border-top-left-radius: 8px; border-top-right-radius: 8px; font-size: 15px; }
+        
+        .pdf-tablo { width: 100%; border-collapse: collapse; margin-bottom: 0; }
         .pdf-tablo th, .pdf-tablo td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 12px; }
         .pdf-tablo th { background-color: #f5f5f5; color: #333; font-weight: bold; }
-        .pdf-toplam { text-align: right; font-size: 18px; font-weight: bold; color: #d84315; margin-top: 15px; }
-        .pdf-tarih { font-size: 10px; color: #777; }
+        .pdf-tablo tr { page-break-inside: avoid; } /* SATIRLARIN KESİLMESİNİ ENGELLER */
+        
+        .musteri-alt-toplam { background-color: #e8f5e9; padding: 10px 15px; font-weight: bold; display: flex; justify-content: space-between; border: 1px solid #c8e6c9; border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; color: #1b5e20; font-size: 14px; }
+        
+        .pdf-genel-toplam-kutu { text-align: right; font-size: 20px; font-weight: bold; color: #d84315; margin-top: 30px; padding: 15px; border-top: 3px solid #d84315; page-break-inside: avoid; }
+        .pdf-tarih { font-size: 11px; color: #666; }
     </style>
 </head>
 <body>
@@ -141,7 +150,6 @@
 
     <!-- ANA UYGULAMA -->
     <div id="mainApp">
-        
         <!-- YENİ KAYIT SEKMESİ -->
         <div id="tab-kayit" class="tab-content active">
             <div class="input-group">
@@ -220,7 +228,7 @@
                     <strong id="yillikKazanc">0 TL</strong>
                 </div>
             </div>
-            <button class="btn btn-pdf-aylik" onclick="indirAylikPDF()">📊 Aylık PDF İndir (Detaylı)</button>
+            <button class="btn btn-pdf-aylik" onclick="indirAylikPDF()">📊 Aylık PDF İndir (Müşteri Dökümlü)</button>
             <button class="btn btn-pdf-yillik" onclick="indirYillikPDF()">📈 Yıllık PDF İndir (Aylık Özet)</button>
         </div>
 
@@ -237,22 +245,15 @@
 <!-- PDF Şablonları (Gizli) -->
 <div id="pdfSanalAlan">
     
-    <!-- YENİ VE DETAYLI AYLIK ŞABLON -->
+    <!-- YENİ VE DETAYLI (KİŞİ BAZLI) AYLIK ŞABLON -->
     <div id="pdfAylikSablon" style="display: none;">
-        <h2 class="pdf-baslik" id="aylikPdfBaslik">Aylık Detaylı Rapor</h2>
-        <table class="pdf-tablo">
-            <thead>
-                <tr>
-                    <th>Tarih</th>
-                    <th>Müşteri Adı</th>
-                    <th>Güzergah</th>
-                    <th>Tonaj (Birim)</th>
-                    <th>Tutar</th>
-                </tr>
-            </thead>
-            <tbody id="aylikPdfTabloGövde"></tbody>
-        </table>
-        <div class="pdf-toplam" id="aylikPdfGenelToplam"></div>
+        <h2 class="pdf-baslik" id="aylikPdfBaslik">Aylık Detaylı İş Dökümü</h2>
+        
+        <!-- Müşterilerin tabloları bu div'in içine JavaScript ile sırayla basılacak -->
+        <div id="aylikPdfIcerik"></div>
+        
+        <!-- Ayın Genel Toplamı -->
+        <div class="pdf-genel-toplam-kutu" id="aylikPdfGenelToplam"></div>
     </div>
 
     <!-- YILLIK ŞABLON -->
@@ -262,7 +263,7 @@
             <thead><tr><th>Aylar</th><th>O Ay Taşınan Tonaj</th><th>O Ay Oluşan Ücret</th></tr></thead>
             <tbody id="yillikPdfTabloGövde"></tbody>
         </table>
-        <div class="pdf-toplam" id="yillikPdfGenelToplam"></div>
+        <div class="pdf-genel-toplam-kutu" id="yillikPdfGenelToplam"></div>
     </div>
 </div>
 
@@ -370,8 +371,8 @@
             const bugunBaslangic = new Date(simdi.getFullYear(), simdi.getMonth(), simdi.getDate()).getTime();
             const birHaftaOnce = simdi.getTime() - (7 * 24 * 60 * 60 * 1000);
 
-            // Rapor dizileri
-            let pdfAylikIsler = []; // AY İÇİNDEKİ HER BİR İŞ BURADA TOPLANACAK
+            // Müşteriye göre ayrılmış aylık işler dizisi (Obje formatında)
+            let pdfAylikMusteriler = {}; 
             let pdfYillikAylar = {}; 
             for(let i=0; i<12; i++) pdfYillikAylar[i] = { kilo: 0, ciro: 0 }; 
 
@@ -384,10 +385,7 @@
                     const islemAyi = tarihObje.getMonth();
                     const islemTarihiFormati = tarihObje.toLocaleDateString('tr-TR') + ' ' + tarihObje.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
 
-                    // Kart Tasarımı
-                    const odemeDurumuHtml = data.odemeAlindi 
-                        ? `<span class="badge paid">✔️ Ödendi</span>` 
-                        : `<span class="badge unpaid">⏳ Bekliyor</span>`;
+                    const odemeDurumuHtml = data.odemeAlindi ? `<span class="badge paid">✔️ Ödendi</span>` : `<span class="badge unpaid">⏳ Bekliyor</span>`;
                     
                     const htmlKart = `
                         <div class="record-card ${data.odemeAlindi ? '' : 'unpaid'}">
@@ -406,29 +404,38 @@
                         </div>
                     `;
 
-                    // Uygulama Ekranı Kayıtları
                     kayitListesi.innerHTML += htmlKart;
                     if(!data.odemeAlindi) {
                         alacakListesi.innerHTML += htmlKart;
                         toplamBekleyenAlacak += data.toplam;
                     }
 
-                    // Pano Hesaplamaları
                     if(data.tarih >= bugunBaslangic) gunlukTop += data.toplam;
                     if(data.tarih >= birHaftaOnce) haftalikTop += data.toplam;
                     if(islemYili === mevcutYil && islemAyi === mevcutAy) aylikTop += data.toplam;
                     if(islemYili === mevcutYil) yillikTop += data.toplam;
 
-                    // YENİ: AYLIK PDF İÇİN DETAYLI SATIR EKLEME
+                    // YENİ: MÜŞTERİYE GÖRE KİŞİSELLEŞTİRİLMİŞ PDF DÖKÜMÜ İÇİN VERİ TOPLAMA
                     if(islemYili === mevcutYil && islemAyi === mevcutAy) {
-                        pdfAylikIsler.push({
+                        // Eğer müşteri daha önce listeye eklenmediyse boş bir şablon oluştur
+                        if(!pdfAylikMusteriler[data.musteri]) {
+                            pdfAylikMusteriler[data.musteri] = {
+                                isler: [],
+                                toplamKilo: 0,
+                                toplamCiro: 0
+                            };
+                        }
+                        // İş bilgilerini bu müşterinin listesine ekle
+                        pdfAylikMusteriler[data.musteri].isler.push({
                             tarih: islemTarihiFormati,
-                            musteri: data.musteri,
                             rota: `${data.nereden || '-'} ➔ ${data.nereye || '-'}`,
                             kilo: data.kilo,
                             fiyat: data.fiyat,
                             toplam: data.toplam
                         });
+                        // Müşterinin kendi toplamlarını güncelle
+                        pdfAylikMusteriler[data.musteri].toplamKilo += data.kilo;
+                        pdfAylikMusteriler[data.musteri].toplamCiro += data.toplam;
                     }
 
                     if(islemYili === mevcutYil) {
@@ -438,30 +445,60 @@
                 }
             });
 
-            // Panoları Güncelle
+            // Ekranları Güncelle
             document.getElementById('toplamAlacakPanosu').innerText = toplamBekleyenAlacak.toLocaleString('tr-TR') + ' TL';
             document.getElementById('gunlukKazanc').innerText = gunlukTop.toLocaleString('tr-TR') + ' TL';
             document.getElementById('haftalikKazanc').innerText = haftalikTop.toLocaleString('tr-TR') + ' TL';
             document.getElementById('aylikKazanc').innerText = aylikTop.toLocaleString('tr-TR') + ' TL';
             document.getElementById('yillikKazanc').innerText = yillikTop.toLocaleString('tr-TR') + ' TL';
 
-            // YENİ: DETAYLI AYLIK PDF TABLOSUNU OLUŞTURMA
+            // --------- YENİ DETAYLI AYLIK PDF TABLOSUNU OLUŞTURMA ---------
             document.getElementById('aylikPdfBaslik').innerText = `${aylarIsim[mevcutAy]} ${mevcutYil} - İş Dökümü`;
-            const aylikGövde = document.getElementById('aylikPdfTabloGövde');
+            const aylikGövde = document.getElementById('aylikPdfIcerik');
             aylikGövde.innerHTML = '';
             
-            pdfAylikIsler.forEach(islem => {
-                aylikGövde.innerHTML += `<tr>
-                    <td><div class="pdf-tarih">${islem.tarih}</div></td>
-                    <td><b>${islem.musteri}</b></td>
-                    <td>${islem.rota}</td>
-                    <td>${(islem.kilo / 1000).toFixed(2)} Ton <br><small>(${islem.fiyat} ₺)</small></td>
-                    <td><b>${islem.toplam.toLocaleString('tr-TR')} TL</b></td>
-                </tr>`;
-            });
-            document.getElementById('aylikPdfGenelToplam').innerText = `TOPLAM AYLIK CİRO: ${aylikTop.toLocaleString('tr-TR')} TL`;
+            // Her bir müşteri için ayrı bir grup (tablo) oluştur
+            for (const [musteriAdi, musteriData] of Object.entries(pdfAylikMusteriler)) {
+                
+                let isSatirlari = '';
+                musteriData.isler.forEach(islem => {
+                    isSatirlari += `
+                        <tr>
+                            <td><div class="pdf-tarih">${islem.tarih}</div></td>
+                            <td>${islem.rota}</td>
+                            <td>${(islem.kilo / 1000).toFixed(2)} Ton <br><small>(${islem.fiyat} ₺)</small></td>
+                            <td><b>${islem.toplam.toLocaleString('tr-TR')} TL</b></td>
+                        </tr>
+                    `;
+                });
 
-            // YILLIK PDF
+                aylikGövde.innerHTML += `
+                    <div class="musteri-rapor-grubu">
+                        <h3 class="musteri-baslik">Müşteri: ${musteriAdi}</h3>
+                        <table class="pdf-tablo">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Güzergah</th>
+                                    <th>Tonaj (Birim)</th>
+                                    <th>Tutar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${isSatirlari}
+                            </tbody>
+                        </table>
+                        <div class="musteri-alt-toplam">
+                            <span>Ara Toplam (${musteriAdi}):</span>
+                            <span>${(musteriData.toplamKilo / 1000).toFixed(2)} Ton &nbsp; | &nbsp; ${musteriData.toplamCiro.toLocaleString('tr-TR')} TL</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('aylikPdfGenelToplam').innerText = `AYLIK GENEL CİRO: ${aylikTop.toLocaleString('tr-TR')} TL`;
+
+            // --------- YILLIK PDF ---------
             document.getElementById('yillikPdfBaslik').innerText = `${mevcutYil} Yılı - Aylık Özetler`;
             const yillikGövde = document.getElementById('yillikPdfTabloGövde');
             yillikGövde.innerHTML = '';
@@ -486,16 +523,37 @@
         }
     }
 
+    // PDF İndirme Komutları (Sayfa Kesilmesini Önleyen Ayarlarla Birlikte)
     window.indirAylikPDF = function() {
         const sablon = document.getElementById('pdfAylikSablon');
         sablon.style.display = 'block'; 
-        html2pdf().set({ margin: 1, filename: 'Aylik_Detayli_Rapor.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(sablon).save().then(() => { sablon.style.display = 'none'; });
+        
+        const ayarlar = {
+            margin:       0.4,
+            filename:     'Aylik_Musteri_Dokumu.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } // Altının kesilmesini engeller
+        };
+
+        html2pdf().set(ayarlar).from(sablon).save().then(() => { sablon.style.display = 'none'; });
     }
 
     window.indirYillikPDF = function() {
         const sablon = document.getElementById('pdfYillikSablon');
         sablon.style.display = 'block';
-        html2pdf().set({ margin: 1, filename: 'Yillik_Rapor.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(sablon).save().then(() => { sablon.style.display = 'none'; });
+        
+        const ayarlar = {
+            margin:       0.4,
+            filename:     'Yillik_Rapor.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        html2pdf().set(ayarlar).from(sablon).save().then(() => { sablon.style.display = 'none'; });
     }
 
     window.sekmeDegistir = function(sekmeId, tiklananElement) {
